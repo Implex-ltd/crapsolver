@@ -10,8 +10,8 @@ var (
 )
 
 var (
-	TASKTYPE_ENTERPRISE = 1
-	TASKTYPE_NORMAL     = 0
+	TASKTYPE_ENTERPRISE = 0
+	TASKTYPE_NORMAL     = 1
 )
 
 var (
@@ -56,7 +56,7 @@ type TaskConfig struct {
 
 	// @text_free_entry (bool, optional): Whether free text entry is allowed.
 	// -> Defaults to False.
-	A11YTfe string `json:"a11y_tfe"`
+	A11YTfe bool `json:"a11y_tfe"`
 
 	// @turbo (bool, optional): Whether turbo mode is enabled.
 	// -> Defaults to False.

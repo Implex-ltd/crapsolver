@@ -24,7 +24,7 @@ func (S *Solver) NewTask(config *TaskConfig) (resp *TaskResponse, err error) {
 		config.SiteKey = "2eaf963b-eeab-4516-9599-9daa18cd5138"
 	}
 	if config.UserAgent == "" {
-		config.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36"
+		config.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Safari/537.36"
 	}
 	if config.Turbo && (config.TurboSt == 0 || config.TurboSt > 10000) {
 		config.TurboSt = 3000
@@ -47,7 +47,7 @@ func (S *Solver) NewTask(config *TaskConfig) (resp *TaskResponse, err error) {
 		return nil, err
 	}
 
-	if err := json.Unmarshal(body, resp); err != nil {
+	if err := json.Unmarshal(body, &resp); err != nil {
 		return nil, err
 	}
 
@@ -67,7 +67,7 @@ func (S *Solver) GetResult(T *TaskResponse) (resp *CheckResponse, err error) {
 		return nil, err
 	}
 
-	if err := json.Unmarshal(body, resp); err != nil {
+	if err := json.Unmarshal(body, &resp); err != nil {
 		return nil, err
 	}
 
