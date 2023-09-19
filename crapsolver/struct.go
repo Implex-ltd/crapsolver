@@ -68,6 +68,9 @@ type TaskConfig struct {
 
 	// @hc_accessibility (string, optional): hc_accessibility cookie, instant pass normal website.
 	HcAccessibility string `json:"hc_accessibility"`
+
+	// @oneclick_only (bool, optional): If captcha images spawn, task will be stopped and error returned.
+	OneclickOnly bool `json:"oneclick_only"`
 }
 
 type TaskResponse struct {
