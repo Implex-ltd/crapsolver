@@ -23,6 +23,7 @@ var (
 type Solver struct {
 	ServerAddr string
 	Client     *http.Client
+	WaitTime   time.Duration
 }
 
 type TaskConfig struct {

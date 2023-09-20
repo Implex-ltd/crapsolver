@@ -13,7 +13,22 @@ func NewSolver() *Solver {
 	return &Solver{
 		ServerAddr: SERVER_ADDR,
 		Client:     &http.Client{},
+		WaitTime:   3 * time.Second,
 	}
+}
+
+func (S *Solver) SetWaitTime(t time.Duration) error {
+	if t.Seconds() > 30 {
+		return fmt.Errorf("waiting is too long, 30s max")
+	}
+
+	if t.Seconds() < 1 {
+		return fmt.Errorf("waiting is too small, 1s min")
+	}
+
+	S.WaitTime = t
+
+	return nil
 }
 
 func (S *Solver) NewTask(config *TaskConfig) (resp *TaskResponse, err error) {
@@ -94,7 +109,7 @@ func (S *Solver) Solve(config *TaskConfig) (string, error) {
 
 		switch resp.Data.Status {
 		case STATUS_SOLVING:
-			time.Sleep(1 * time.Second)
+			time.Sleep(S.WaitTime)
 		case STATUS_SOLVED:
 			return resp.Data.Token, nil
 		case STATUS_ERROR:
