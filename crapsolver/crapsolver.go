@@ -1,18 +1,34 @@
 package crapsolver
 
 import (
-	"bytes"
 	"encoding/json"
 	"fmt"
-	"io"
-	"net/http"
 	"time"
+
+	"github.com/valyala/fasthttp"
+)
+
+var (
+	headerContentTypeJson = []byte("application/json")
+
+	client = &fasthttp.Client{
+		ReadTimeout:                   10 * time.Second,
+		WriteTimeout:                  10 * time.Second,
+		MaxIdleConnDuration:           time.Minute,
+		NoDefaultUserAgentHeader:      true,
+		DisableHeaderNamesNormalizing: true,
+		DisablePathNormalizing:        true,
+		Dial: (&fasthttp.TCPDialer{
+			Concurrency:      4096,
+			DNSCacheDuration: time.Hour,
+		}).Dial,
+	}
 )
 
 func NewSolver() *Solver {
 	return &Solver{
 		ServerAddr: SERVER_ADDR,
-		Client:     &http.Client{},
+		Client:     client,
 		WaitTime:   3 * time.Second,
 	}
 }
@@ -50,19 +66,18 @@ func (S *Solver) NewTask(config *TaskConfig) (resp *TaskResponse, err error) {
 		return nil, err
 	}
 
-	response, err := S.Client.Post(fmt.Sprintf(`%s/api/task/new`, S.ServerAddr), "application/json", bytes.NewReader(payload))
-	if err != nil {
-		return nil, err
-	}
+	req := fasthttp.AcquireRequest()
+	req.SetRequestURI(fmt.Sprintf(`%s/api/task/new`, S.ServerAddr))
+	req.Header.SetMethod(fasthttp.MethodPost)
+	req.Header.SetContentTypeBytes(headerContentTypeJson)
+	req.SetBodyRaw(payload)
 
-	defer response.Body.Close()
+	response := fasthttp.AcquireResponse()
+	err = client.Do(req, response)
+	fasthttp.ReleaseRequest(req)
+	defer fasthttp.ReleaseResponse(response)
 
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := json.Unmarshal(body, &resp); err != nil {
+	if err := json.Unmarshal(response.Body(), &resp); err != nil {
 		return nil, err
 	}
 
@@ -70,19 +85,16 @@ func (S *Solver) NewTask(config *TaskConfig) (resp *TaskResponse, err error) {
 }
 
 func (S *Solver) GetResult(T *TaskResponse) (resp *CheckResponse, err error) {
-	response, err := S.Client.Get(fmt.Sprintf("%s/api/task/%s", S.ServerAddr, T.Data[0].ID))
-	if err != nil {
-		return nil, err
-	}
+	req := fasthttp.AcquireRequest()
+	req.SetRequestURI(fmt.Sprintf("%s/api/task/%s", S.ServerAddr, T.Data[0].ID))
+	req.Header.SetMethod(fasthttp.MethodGet)
+	req.Header.SetContentTypeBytes(headerContentTypeJson)
 
-	defer response.Body.Close()
+	response := fasthttp.AcquireResponse()
+	err = client.Do(req, response)
+	fasthttp.ReleaseRequest(req)
 
-	body, err := io.ReadAll(response.Body)
-	if err != nil {
-		return nil, err
-	}
-
-	if err := json.Unmarshal(body, &resp); err != nil {
+	if err := json.Unmarshal(response.Body(), &resp); err != nil {
 		return nil, err
 	}
 
@@ -96,7 +108,7 @@ func (S *Solver) Solve(config *TaskConfig) (string, error) {
 	}
 
 	if config.Turbo {
-		time.Sleep(time.Duration(config.TurboSt))
+		time.Sleep(time.Duration(config.TurboSt) * time.Millisecond)
 	} else {
 		time.Sleep(5 * time.Second)
 	}

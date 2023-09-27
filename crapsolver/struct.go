@@ -1,8 +1,9 @@
 package crapsolver
 
 import (
-	"net/http"
 	"time"
+
+	"github.com/valyala/fasthttp"
 )
 
 var (
@@ -22,7 +23,7 @@ var (
 
 type Solver struct {
 	ServerAddr string
-	Client     *http.Client
+	Client     *fasthttp.Client
 	WaitTime   time.Duration
 }
 
