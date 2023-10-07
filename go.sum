@@ -1,3 +1,5 @@
+github.com/0xF7A4C6/GoCycle v0.0.0-20230623065856-dd8a5a180c87 h1:V7ysylc0ejPqpii7EBTrdtHXq3xS9rJa8eRzfQ3HKm8=
+github.com/0xF7A4C6/GoCycle v0.0.0-20230623065856-dd8a5a180c87/go.mod h1:FFXl+R9/Wf68Mo523+cULQTQgLCUdTT4MHHyHN2z6bQ=
 github.com/andybalholm/brotli v1.0.5 h1:8uQZIdzKmjc/iuPu7O2ioW48L81FgatrcpfFmiq/cCs=
 github.com/andybalholm/brotli v1.0.5/go.mod h1:fO7iG3H7G2nSZ7m0zPUDn85XEX2GTukHGRSepvi9Eig=
 github.com/klauspost/compress v1.17.0 h1:Rnbp4K9EjcDuVuHtd0dgA4qNuv9yKDYKK1ulpJwgrqM=

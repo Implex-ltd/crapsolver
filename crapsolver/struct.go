@@ -1,13 +1,8 @@
 package crapsolver
 
 import (
-	"time"
-
 	"github.com/valyala/fasthttp"
-)
-
-var (
-	SERVER_ADDR = "http://127.0.0.1:3000"
+	"time"
 )
 
 var (
@@ -22,9 +17,8 @@ var (
 )
 
 type Solver struct {
-	ServerAddr string
-	Client     *fasthttp.Client
-	WaitTime   time.Duration
+	Client   *fasthttp.Client
+	WaitTime time.Duration
 }
 
 type TaskConfig struct {
