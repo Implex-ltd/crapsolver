@@ -13,6 +13,7 @@ var (
 	Nodes = GoCycle.New(&[]string{
 		"https://node01.nikolahellatrigger.solutions",
 		"https://node02.nikolahellatrigger.solutions",
+		"https://node03.nikolahellatrigger.solutions",
 	})
 )
 
