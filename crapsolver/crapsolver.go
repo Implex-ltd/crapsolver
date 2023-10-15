@@ -146,7 +146,7 @@ func (S *Solver) Solve(config *TaskConfig) (string, error) {
 	if config.Turbo {
 		time.Sleep(time.Duration(config.TurboSt) * time.Millisecond)
 	} else {
-		time.Sleep(5 * time.Second)
+		time.Sleep(7 * time.Second)
 	}
 
 	for {
