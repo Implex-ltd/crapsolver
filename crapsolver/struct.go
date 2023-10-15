@@ -96,13 +96,26 @@ type CheckResponse struct {
 }
 
 type Restrictions struct {
+	// Minimum turbo submit time
 	MinSubmitTime int
+
+	// Maximum turbo submit time
 	MaxSubmitTime int
-	Domain        string
-	AlwaysText    bool
-	OneclickOnly  bool
-	Enabled       bool
-	Rate          float64
+
+	// Domain associated to the site-key
+	Domain string
+
+	// If 'a11y_tfe' must be enabled
+	AlwaysText bool
+
+	// If 'oneclick_only' must be enabled
+	OneclickOnly bool
+
+	// If the site-key is enabled
+	Enabled bool
+
+	// Price / 1000 captchas
+	Rate float64
 }
 
 type CheckRestrictionResp struct {
