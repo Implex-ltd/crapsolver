@@ -22,20 +22,17 @@ type Solver struct {
 }
 
 type TaskConfig struct {
-	// @domain (str, optional): The domain where the captcha is presented.
-	// -> Defaults to "accounts.hcaptcha.com".
+	// @domain (str, required): The domain where the captcha is presented.
 	Domain string `json:"domain"`
 
-	// @sitekey (str, optional): The sitekey associated with the captcha.
-	// -> Defaults to "2eaf963b-eeab-4516-9599-9daa18cd5138".
+	// @sitekey (str, required): The sitekey associated with the captcha.
 	SiteKey string `json:"site_key"`
 
 	// @useragent (str, optional): The user agent to use when making requests.
 	// -> Defaults to a common user agent string.
 	UserAgent string `json:"user_agent"`
 
-	// @proxy (str, optional): The proxy to use for making requests.
-	// -> Defaults to an empty string.
+	// @proxy (str, required): The proxy to use for making requests.
 	Proxy string `json:"proxy"`
 
 	// @task_type (TASK_TYPE, optional): The type of captcha-solving task.
@@ -96,4 +93,19 @@ type CheckResponse struct {
 	} `json:"data"`
 	Message string `json:"message"`
 	Status  string `json:"status"`
+}
+
+type Restrictions struct {
+	MinSubmitTime int
+	MaxSubmitTime int
+	Domain        string
+	AlwaysText    bool
+	OneclickOnly  bool
+	Enabled       bool
+	Rate          float64
+}
+
+type CheckRestrictionResp struct {
+	Success bool         `json:"success"`
+	Data    Restrictions `json:"data"`
 }

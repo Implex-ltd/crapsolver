@@ -2,6 +2,7 @@ package crapsolver
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"time"
 
@@ -9,8 +10,13 @@ import (
 	"github.com/valyala/fasthttp"
 )
 
+const (
+	DEFAULT_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"
+)
+
 var (
 	Nodes = GoCycle.New(&[]string{
+		//"http://127.0.0.1:3000",
 		"https://node01.nikolahellatrigger.solutions",
 		"https://node02.nikolahellatrigger.solutions",
 		"https://node03.nikolahellatrigger.solutions",
@@ -72,15 +78,14 @@ func (S *Solver) SetWaitTime(t time.Duration) error {
 
 // Create captcha task
 func (S *Solver) NewTask(config *TaskConfig, Server string) (resp *TaskResponse, err error) {
-	if config.Domain == "" {
-		config.Domain = "accounts.hcaptcha.com"
+	if config.Domain == "" || config.SiteKey == "" || config.Proxy == "" {
+		return nil, errors.New("please provide site-key, domain & proxy")
 	}
-	if config.SiteKey == "" {
-		config.SiteKey = "2eaf963b-eeab-4516-9599-9daa18cd5138"
+
+	if config.TaskType == TASKTYPE_NORMAL {
+		return nil, errors.New("normal task is disabled")
 	}
-	if config.UserAgent == "" {
-		config.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36"
-	}
+
 	if config.Turbo && (config.TurboSt == 0 || config.TurboSt > 10000) {
 		config.TurboSt = 3000
 	}
