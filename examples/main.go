@@ -13,7 +13,11 @@ var (
 )
 
 func main() {
-	Crap := crapsolver.NewSolver()
+	Crap, err := crapsolver.NewSolver("id:superapikey")
+	if err != nil {
+		panic(err)
+	}
+
 	Crap.SetWaitTime(time.Second * 3) // check for complete task every 3s (reduce our load + make less req on your side..)
 
 	// get restriction for the current sitekey

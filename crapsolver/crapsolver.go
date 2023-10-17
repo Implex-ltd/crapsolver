@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/0xF7A4C6/GoCycle"
@@ -11,7 +12,7 @@ import (
 )
 
 const (
-	DEFAULT_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"
+	DEFAULT_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36"
 )
 
 var (
@@ -40,15 +41,24 @@ var (
 	}
 )
 
-func NewSolver(nodeList ...string) *Solver {
+func NewSolver(apiKey string, nodeList ...string) (*Solver, error) {
 	if len(nodeList) > 0 {
 		Nodes = GoCycle.New(&nodeList)
 	}
 
+	if apiKey == "" {
+		return nil, errors.New("please provide api-key")
+	}
+
+	if !strings.HasPrefix(apiKey, "user:") {
+		return nil, errors.New("apikey format is invalid, be sure to provide 'user:xxxxxxxxxx' format")
+	}
+
 	return &Solver{
+		ApiKey:   apiKey,
 		Client:   client,
 		WaitTime: 3 * time.Second,
-	}
+	}, nil
 }
 
 // delete node address
@@ -98,6 +108,7 @@ func (S *Solver) NewTask(config *TaskConfig, Server string) (resp *TaskResponse,
 	req := fasthttp.AcquireRequest()
 	req.SetRequestURI(fmt.Sprintf(`%s/api/task/new`, Server))
 	req.Header.SetMethod(fasthttp.MethodPost)
+	req.Header.Add("Authorization", S.ApiKey)
 	req.Header.SetContentTypeBytes(headerContentTypeJson)
 	req.SetBodyRaw(payload)
 
@@ -110,6 +121,10 @@ func (S *Solver) NewTask(config *TaskConfig, Server string) (resp *TaskResponse,
 		return nil, err
 	}
 
+	if !resp.Success {
+		return nil, fmt.Errorf(resp.Message)
+	}
+
 	return resp, nil
 }
 
@@ -118,6 +133,7 @@ func (S *Solver) GetResult(T *TaskResponse, Server string) (resp *CheckResponse,
 	req := fasthttp.AcquireRequest()
 	req.SetRequestURI(fmt.Sprintf("%s/api/task/%s", Server, T.Data[0].ID))
 	req.Header.SetMethod(fasthttp.MethodGet)
+	req.Header.Add("Authorization", S.ApiKey)
 	req.Header.SetContentTypeBytes(headerContentTypeJson)
 
 	response := fasthttp.AcquireResponse()
