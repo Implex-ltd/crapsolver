@@ -19,7 +19,10 @@ func GetRestrictions(sitekey string) (*Restrictions, error) {
 	req.Header.SetContentTypeBytes(headerContentTypeJson)
 
 	response := fasthttp.AcquireResponse()
-	err = client.Do(req, response)
+	if err = client.Do(req, response); err != nil {
+		return nil, err
+	}
+
 	fasthttp.ReleaseRequest(req)
 
 	var resp CheckRestrictionResp
