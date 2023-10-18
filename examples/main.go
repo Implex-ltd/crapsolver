@@ -31,7 +31,7 @@ func main() {
 	/**
 	 * Use the function "Crap.SolveUntil(config, max_retry...)" to retry if error spawn (leave 0 = infinite) / return list of spawned errors
 	 */
-	token, err := Crap.Solve(&crapsolver.TaskConfig{
+	token, user_agent, err := Crap.Solve(&crapsolver.TaskConfig{
 		SiteKey:  KEY,
 		Domain:   DOMAIN,
 		TaskType: crapsolver.TASKTYPE_ENTERPRISE,
@@ -45,4 +45,5 @@ func main() {
 	}
 
 	log.Println("solved:", token)
+	log.Println(user_agent)
 }

@@ -1,8 +1,9 @@
 package crapsolver
 
 import (
-	"github.com/valyala/fasthttp"
 	"time"
+
+	"github.com/valyala/fasthttp"
 )
 
 var (
@@ -91,6 +92,7 @@ type CheckResponse struct {
 		Status     int    `json:"status"`
 		Success    bool   `json:"success"`
 		Token      string `json:"token"`
+		UserAgent  string `json:"user_agent"`
 	} `json:"data"`
 	Message string `json:"message"`
 	Status  string `json:"status"`

@@ -17,7 +17,7 @@ const (
 
 var (
 	Nodes = GoCycle.New(&[]string{
-		//"http://127.0.0.1:3000",
+		//"http://127.0.0.1:80",
 		"https://node01.nikolahellatrigger.solutions",
 		"https://node02.nikolahellatrigger.solutions",
 		"https://node03.nikolahellatrigger.solutions",
@@ -148,15 +148,15 @@ func (S *Solver) GetResult(T *TaskResponse, Server string) (resp *CheckResponse,
 }
 
 // Solve captcha and raise error if can't solve
-func (S *Solver) Solve(config *TaskConfig) (string, error) {
+func (S *Solver) Solve(config *TaskConfig) (string, string, error) {
 	server, err := Nodes.Next()
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	task, err := S.NewTask(config, server)
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	if config.Turbo {
@@ -168,22 +168,22 @@ func (S *Solver) Solve(config *TaskConfig) (string, error) {
 	for {
 		resp, err := S.GetResult(task, server)
 		if err != nil {
-			return "", err
+			return "", "", err
 		}
 
 		switch resp.Data.Status {
 		case STATUS_SOLVING:
 			time.Sleep(S.WaitTime)
 		case STATUS_SOLVED:
-			return resp.Data.Token, nil
+			return resp.Data.Token, resp.Data.UserAgent, nil
 		case STATUS_ERROR:
-			return "", fmt.Errorf(resp.Data.Error)
+			return "", "", fmt.Errorf(resp.Data.Error)
 		}
 	}
 }
 
 // Attempt to solve a captcha indefinitely until success, leave the "retry" parameter at 0 to solve indefinitely, modify it to stop if X errors occur and return a list of errors.
-func (S *Solver) SolveUntil(config *TaskConfig, retry ...int) (string, error) {
+func (S *Solver) SolveUntil(config *TaskConfig, retry ...int) (string, string, error) {
 	errs := []error{}
 
 	maxRetry := 0
@@ -193,15 +193,15 @@ func (S *Solver) SolveUntil(config *TaskConfig, retry ...int) (string, error) {
 
 	for {
 		if len(errs) > maxRetry && maxRetry != 0 {
-			return "", fmt.Errorf("max retry reached errors: %v", errs)
+			return "", "", fmt.Errorf("max retry reached errors: %v", errs)
 		}
 
-		token, err := S.Solve(config)
+		token, ua, err := S.Solve(config)
 		if err != nil {
 			errs = append(errs, err)
 			continue
 		}
 
-		return token, nil
+		return token, ua, nil
 	}
 }
