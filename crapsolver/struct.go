@@ -98,6 +98,18 @@ type CheckResponse struct {
 	Status  string `json:"status"`
 }
 
+type GetUserResp struct {
+	Data struct {
+		Error              string `json:"error"`
+		Balance            string `json:"balance"`
+		ApiKey             string `json:"id"`
+		SolvedHcaptcha     int    `json:"solved_hcaptcha"`
+		ThreadUsedHcaptcha int    `json:"thread_used_hcaptcha"`
+		ThreadMaxHcaptcha  int    `json:"thread_max_hcaptcha"`
+	} `json:"data"`
+	Success bool `json:"success"`
+}
+
 type Restrictions struct {
 	// Minimum turbo submit time
 	MinSubmitTime int
