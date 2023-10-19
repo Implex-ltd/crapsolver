@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 	"time"
 
 	"github.com/0xF7A4C6/GoCycle"
@@ -11,12 +12,12 @@ import (
 )
 
 const (
-	DEFAULT_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36"
+	DEFAULT_UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/117.0.0.0 Safari/537.36"
 )
 
 var (
 	Nodes = GoCycle.New(&[]string{
-		//"http://127.0.0.1:3000",
+		//"http://127.0.0.1:80",
 		"https://node01.nikolahellatrigger.solutions",
 		"https://node02.nikolahellatrigger.solutions",
 		"https://node03.nikolahellatrigger.solutions",
@@ -40,15 +41,24 @@ var (
 	}
 )
 
-func NewSolver(nodeList ...string) *Solver {
+func NewSolver(apiKey string, nodeList ...string) (*Solver, error) {
 	if len(nodeList) > 0 {
 		Nodes = GoCycle.New(&nodeList)
 	}
 
+	if apiKey == "" {
+		return nil, errors.New("please provide api-key")
+	}
+
+	if !strings.HasPrefix(apiKey, "user:") {
+		return nil, errors.New("apikey format is invalid, be sure to provide 'user:xxxxxxxxxx' format")
+	}
+
 	return &Solver{
+		ApiKey:   apiKey,
 		Client:   client,
 		WaitTime: 3 * time.Second,
-	}
+	}, nil
 }
 
 // delete node address
@@ -98,6 +108,8 @@ func (S *Solver) NewTask(config *TaskConfig, Server string) (resp *TaskResponse,
 	req := fasthttp.AcquireRequest()
 	req.SetRequestURI(fmt.Sprintf(`%s/api/task/new`, Server))
 	req.Header.SetMethod(fasthttp.MethodPost)
+	req.Header.Add("Authorization", S.ApiKey)
+	req.Header.SetUserAgent("crapsolver-go")
 	req.Header.SetContentTypeBytes(headerContentTypeJson)
 	req.SetBodyRaw(payload)
 
@@ -110,6 +122,10 @@ func (S *Solver) NewTask(config *TaskConfig, Server string) (resp *TaskResponse,
 		return nil, err
 	}
 
+	if !resp.Success {
+		return nil, fmt.Errorf(resp.Message)
+	}
+
 	return resp, nil
 }
 
@@ -118,10 +134,16 @@ func (S *Solver) GetResult(T *TaskResponse, Server string) (resp *CheckResponse,
 	req := fasthttp.AcquireRequest()
 	req.SetRequestURI(fmt.Sprintf("%s/api/task/%s", Server, T.Data[0].ID))
 	req.Header.SetMethod(fasthttp.MethodGet)
+	req.Header.Add("Authorization", S.ApiKey)
+	req.Header.SetUserAgent("crapsolver-go")
 	req.Header.SetContentTypeBytes(headerContentTypeJson)
 
 	response := fasthttp.AcquireResponse()
 	err = client.Do(req, response)
+	if err != nil {
+		return nil, err
+	}
+
 	fasthttp.ReleaseRequest(req)
 
 	if err := json.Unmarshal(response.Body(), &resp); err != nil {
@@ -132,15 +154,15 @@ func (S *Solver) GetResult(T *TaskResponse, Server string) (resp *CheckResponse,
 }
 
 // Solve captcha and raise error if can't solve
-func (S *Solver) Solve(config *TaskConfig) (string, error) {
+func (S *Solver) Solve(config *TaskConfig) (*CheckResponse, error) {
 	server, err := Nodes.Next()
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	task, err := S.NewTask(config, server)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	if config.Turbo {
@@ -152,22 +174,22 @@ func (S *Solver) Solve(config *TaskConfig) (string, error) {
 	for {
 		resp, err := S.GetResult(task, server)
 		if err != nil {
-			return "", err
+			return nil, err
 		}
 
 		switch resp.Data.Status {
 		case STATUS_SOLVING:
 			time.Sleep(S.WaitTime)
 		case STATUS_SOLVED:
-			return resp.Data.Token, nil
+			return resp, nil
 		case STATUS_ERROR:
-			return "", fmt.Errorf(resp.Data.Error)
+			return nil, fmt.Errorf(resp.Data.Error)
 		}
 	}
 }
 
 // Attempt to solve a captcha indefinitely until success, leave the "retry" parameter at 0 to solve indefinitely, modify it to stop if X errors occur and return a list of errors.
-func (S *Solver) SolveUntil(config *TaskConfig, retry ...int) (string, error) {
+func (S *Solver) SolveUntil(config *TaskConfig, retry ...int) (*CheckResponse, error) {
 	errs := []error{}
 
 	maxRetry := 0
@@ -177,15 +199,15 @@ func (S *Solver) SolveUntil(config *TaskConfig, retry ...int) (string, error) {
 
 	for {
 		if len(errs) > maxRetry && maxRetry != 0 {
-			return "", fmt.Errorf("max retry reached errors: %v", errs)
+			return nil, fmt.Errorf("max retry reached errors: %v", errs)
 		}
 
-		token, err := S.Solve(config)
+		resp, err := S.Solve(config)
 		if err != nil {
 			errs = append(errs, err)
 			continue
 		}
 
-		return token, nil
+		return resp, nil
 	}
 }

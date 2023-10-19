@@ -1,8 +1,9 @@
 package crapsolver
 
 import (
-	"github.com/valyala/fasthttp"
 	"time"
+
+	"github.com/valyala/fasthttp"
 )
 
 var (
@@ -19,6 +20,8 @@ var (
 type Solver struct {
 	Client   *fasthttp.Client
 	WaitTime time.Duration
+
+	ApiKey string
 }
 
 type TaskConfig struct {
@@ -66,20 +69,19 @@ type TaskConfig struct {
 	OneclickOnly bool `json:"oneclick_only"`
 }
 
+type TaskDataResponse struct {
+	ID         string `json:"id"`
+	Status     int    `json:"status"`
+	Token      string `json:"token"`
+	Error      string `json:"error"`
+	Success    bool   `json:"success"`
+	Expiration int    `json:"expiration"`
+}
+
 type TaskResponse struct {
-	Data []struct {
-		CreatedAt  time.Time `json:"CreatedAt"`
-		UpdatedAt  time.Time `json:"UpdatedAt"`
-		DeletedAt  time.Time `json:"DeletedAt"`
-		ID         string    `json:"id"`
-		Status     int       `json:"status"`
-		Token      string    `json:"token"`
-		Error      string    `json:"error"`
-		Success    bool      `json:"success"`
-		Expiration int       `json:"expiration"`
-	} `json:"data"`
-	Message string `json:"message"`
-	Success bool   `json:"success"`
+	Data    []TaskDataResponse `json:"data,omitempty"`
+	Message string             `json:"message"`
+	Success bool               `json:"success"`
 }
 
 type CheckResponse struct {
@@ -90,9 +92,23 @@ type CheckResponse struct {
 		Status     int    `json:"status"`
 		Success    bool   `json:"success"`
 		Token      string `json:"token"`
+		UserAgent  string `json:"user_agent"`
+		Req        string `json:"req"`
 	} `json:"data"`
 	Message string `json:"message"`
 	Status  string `json:"status"`
+}
+
+type GetUserResp struct {
+	Data struct {
+		Error              string `json:"error"`
+		Balance            string `json:"balance"`
+		ApiKey             string `json:"id"`
+		SolvedHcaptcha     int    `json:"solved_hcaptcha"`
+		ThreadUsedHcaptcha int    `json:"thread_used_hcaptcha"`
+		ThreadMaxHcaptcha  int    `json:"thread_max_hcaptcha"`
+	} `json:"data"`
+	Success bool `json:"success"`
 }
 
 type Restrictions struct {

@@ -13,7 +13,11 @@ var (
 )
 
 func main() {
-	Crap := crapsolver.NewSolver()
+	Crap, err := crapsolver.NewSolver("user:superapikey")
+	if err != nil {
+		panic(err)
+	}
+
 	Crap.SetWaitTime(time.Second * 3) // check for complete task every 3s (reduce our load + make less req on your side..)
 
 	// get restriction for the current sitekey
@@ -27,7 +31,7 @@ func main() {
 	/**
 	 * Use the function "Crap.SolveUntil(config, max_retry...)" to retry if error spawn (leave 0 = infinite) / return list of spawned errors
 	 */
-	token, err := Crap.Solve(&crapsolver.TaskConfig{
+	resp, err := Crap.Solve(&crapsolver.TaskConfig{
 		SiteKey:  KEY,
 		Domain:   DOMAIN,
 		TaskType: crapsolver.TASKTYPE_ENTERPRISE,
@@ -40,5 +44,6 @@ func main() {
 		panic(err)
 	}
 
-	log.Println("solved:", token)
+	log.Println("solved:", resp.Data.Token)
+	log.Println("submit this key using user-agent: ", resp.Data.UserAgent)
 }
