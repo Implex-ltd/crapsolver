@@ -143,7 +143,7 @@ func (S *Solver) GetResult(T *TaskResponse, Server string) (resp *CheckResponse,
 	if err != nil {
 		return nil, err
 	}
-	
+
 	fasthttp.ReleaseRequest(req)
 
 	if err := json.Unmarshal(response.Body(), &resp); err != nil {
@@ -154,15 +154,15 @@ func (S *Solver) GetResult(T *TaskResponse, Server string) (resp *CheckResponse,
 }
 
 // Solve captcha and raise error if can't solve
-func (S *Solver) Solve(config *TaskConfig) (string, string, error) {
+func (S *Solver) Solve(config *TaskConfig) (*CheckResponse, error) {
 	server, err := Nodes.Next()
 	if err != nil {
-		return "", "", err
+		return nil, err
 	}
 
 	task, err := S.NewTask(config, server)
 	if err != nil {
-		return "", "", err
+		return nil, err
 	}
 
 	if config.Turbo {
@@ -174,22 +174,22 @@ func (S *Solver) Solve(config *TaskConfig) (string, string, error) {
 	for {
 		resp, err := S.GetResult(task, server)
 		if err != nil {
-			return "", "", err
+			return nil, err
 		}
 
 		switch resp.Data.Status {
 		case STATUS_SOLVING:
 			time.Sleep(S.WaitTime)
 		case STATUS_SOLVED:
-			return resp.Data.Token, resp.Data.UserAgent, nil
+			return resp, nil
 		case STATUS_ERROR:
-			return "", "", fmt.Errorf(resp.Data.Error)
+			return nil, fmt.Errorf(resp.Data.Error)
 		}
 	}
 }
 
 // Attempt to solve a captcha indefinitely until success, leave the "retry" parameter at 0 to solve indefinitely, modify it to stop if X errors occur and return a list of errors.
-func (S *Solver) SolveUntil(config *TaskConfig, retry ...int) (string, string, error) {
+func (S *Solver) SolveUntil(config *TaskConfig, retry ...int) (*CheckResponse, error) {
 	errs := []error{}
 
 	maxRetry := 0
@@ -199,15 +199,15 @@ func (S *Solver) SolveUntil(config *TaskConfig, retry ...int) (string, string, e
 
 	for {
 		if len(errs) > maxRetry && maxRetry != 0 {
-			return "", "", fmt.Errorf("max retry reached errors: %v", errs)
+			return nil, fmt.Errorf("max retry reached errors: %v", errs)
 		}
 
-		token, ua, err := S.Solve(config)
+		resp, err := S.Solve(config)
 		if err != nil {
 			errs = append(errs, err)
 			continue
 		}
 
-		return token, ua, nil
+		return resp, nil
 	}
 }

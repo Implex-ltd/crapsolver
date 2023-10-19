@@ -93,6 +93,7 @@ type CheckResponse struct {
 		Success    bool   `json:"success"`
 		Token      string `json:"token"`
 		UserAgent  string `json:"user_agent"`
+		Req        string `json:"req"`
 	} `json:"data"`
 	Message string `json:"message"`
 	Status  string `json:"status"`

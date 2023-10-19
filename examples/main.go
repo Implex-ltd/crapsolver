@@ -31,7 +31,7 @@ func main() {
 	/**
 	 * Use the function "Crap.SolveUntil(config, max_retry...)" to retry if error spawn (leave 0 = infinite) / return list of spawned errors
 	 */
-	token, user_agent, err := Crap.Solve(&crapsolver.TaskConfig{
+	resp, err := Crap.Solve(&crapsolver.TaskConfig{
 		SiteKey:  KEY,
 		Domain:   DOMAIN,
 		TaskType: crapsolver.TASKTYPE_ENTERPRISE,
@@ -44,6 +44,6 @@ func main() {
 		panic(err)
 	}
 
-	log.Println("solved:", token)
-	log.Println(user_agent)
+	log.Println("solved:", resp.Data.Token)
+	log.Println("submit this key using user-agent: ", resp.Data.UserAgent)
 }
