@@ -16,6 +16,7 @@ func GetRestrictions(sitekey string) (*Restrictions, error) {
 	req := fasthttp.AcquireRequest()
 	req.SetRequestURI(fmt.Sprintf("%s/api/misc/check/%s", Server, sitekey))
 	req.Header.SetMethod(fasthttp.MethodGet)
+	req.Header.SetUserAgent("crapsolver-go")
 	req.Header.SetContentTypeBytes(headerContentTypeJson)
 
 	response := fasthttp.AcquireResponse()

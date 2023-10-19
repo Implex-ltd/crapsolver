@@ -13,7 +13,7 @@ var (
 )
 
 func main() {
-	Crap, err := crapsolver.NewSolver("id:superapikey")
+	Crap, err := crapsolver.NewSolver("user:superapikey")
 	if err != nil {
 		panic(err)
 	}

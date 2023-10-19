@@ -109,6 +109,7 @@ func (S *Solver) NewTask(config *TaskConfig, Server string) (resp *TaskResponse,
 	req.SetRequestURI(fmt.Sprintf(`%s/api/task/new`, Server))
 	req.Header.SetMethod(fasthttp.MethodPost)
 	req.Header.Add("Authorization", S.ApiKey)
+	req.Header.SetUserAgent("crapsolver-go")
 	req.Header.SetContentTypeBytes(headerContentTypeJson)
 	req.SetBodyRaw(payload)
 
@@ -134,10 +135,15 @@ func (S *Solver) GetResult(T *TaskResponse, Server string) (resp *CheckResponse,
 	req.SetRequestURI(fmt.Sprintf("%s/api/task/%s", Server, T.Data[0].ID))
 	req.Header.SetMethod(fasthttp.MethodGet)
 	req.Header.Add("Authorization", S.ApiKey)
+	req.Header.SetUserAgent("crapsolver-go")
 	req.Header.SetContentTypeBytes(headerContentTypeJson)
 
 	response := fasthttp.AcquireResponse()
 	err = client.Do(req, response)
+	if err != nil {
+		return nil, err
+	}
+	
 	fasthttp.ReleaseRequest(req)
 
 	if err := json.Unmarshal(response.Body(), &resp); err != nil {
