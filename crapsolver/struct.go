@@ -67,6 +67,10 @@ type TaskConfig struct {
 
 	// @oneclick_only (bool, optional): If captcha images spawn, task will be stopped and error returned.
 	OneclickOnly bool `json:"oneclick_only"`
+
+	// @href (string, optional): href of the actual page where the captcha spawn, get it via motionData.
+	// Defaults to https://domain.
+	Href string `json:"href"`
 }
 
 type TaskDataResponse struct {
@@ -101,12 +105,13 @@ type CheckResponse struct {
 
 type GetUserResp struct {
 	Data struct {
-		Error              string `json:"error"`
-		Balance            string `json:"balance"`
-		ApiKey             string `json:"id"`
-		SolvedHcaptcha     int    `json:"solved_hcaptcha"`
-		ThreadUsedHcaptcha int    `json:"thread_used_hcaptcha"`
-		ThreadMaxHcaptcha  int    `json:"thread_max_hcaptcha"`
+		Error                 string `json:"error"`
+		Balance               string `json:"balance"`
+		ApiKey                string `json:"id"`
+		SolvedHcaptcha        int    `json:"solved_hcaptcha"`
+		ThreadUsedHcaptcha    int    `json:"thread_used_hcaptcha"`
+		ThreadMaxHcaptcha     int    `json:"thread_max_hcaptcha"`
+		BypassRestrictedSites bool   `json:"bypass_restricted_sites"`
 	} `json:"data"`
 	Success bool `json:"success"`
 }
