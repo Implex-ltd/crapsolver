@@ -67,6 +67,10 @@ type TaskConfig struct {
 
 	// @oneclick_only (bool, optional): If captcha images spawn, task will be stopped and error returned.
 	OneclickOnly bool `json:"oneclick_only"`
+
+	// @href (string, optional): href of the actual page where the captcha spawn, get it via motionData.
+	// Defaults to https://domain.
+	Href string `json:"href"`
 }
 
 type TaskDataResponse struct {
