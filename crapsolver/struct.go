@@ -71,6 +71,12 @@ type TaskConfig struct {
 	// @href (string, optional): href of the actual page where the captcha spawn, get it via motionData.
 	// Defaults to https://domain.
 	Href string `json:"href"`
+
+	// @exec (bool, optional): Params you can gather via motionData
+	Exec bool `json:"exec"`
+
+	// @dr (string, optional): Params you can gather via motionData
+	Dr string `json:"dr"`
 }
 
 type TaskDataResponse struct {
